@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plano Alimentar · Laura Oliveira</title>
+<style>
+  :root {
+    --rosa: #C45D78;
+    --rosa-claro: #F5E6EA;
+    --rosa-hover: #B04D69;
+    --verde: #4A9B7F;
+    --verde-claro: #E8F5F0;
+    --bg: #FDFAF8;
+    --card: #FFFFFF;
+    --texto: #2D2D2D;
+    --muted: #7A7A7A;
+    --borda: #EDE8E5;
+    --laranja: #E07B50;
+    --roxo: #8B6BA8;
+    --azul: #4A7FAB;
+    --radius: 14px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.07);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--texto); font-size: 15px; line-height: 1.6; }
+
+  /* HEADER */
+  header { background: var(--rosa); color: #fff; padding: 20px 16px 16px; text-align: center; }
+  header .logo { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.85; margin-bottom: 6px; }
+  header h1 { font-size: 22px; font-weight: 700; margin-bottom: 2px; }
+  header p { font-size: 13px; opacity: 0.85; }
+  .header-meta { display: flex; justify-content: center; gap: 20px; margin-top: 12px; flex-wrap: wrap; }
+  .meta-pill { background: rgba(255,255,255,0.2); border-radius: 20px; padding: 4px 12px; font-size: 12px; }
+
+  /* WATER BAR */
+  .water-bar { background: var(--azul); color: #fff; padding: 10px 16px; text-align: center; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .water-cups { display: flex; gap: 4px; }
+  .cup { width: 22px; height: 22px; border-radius: 4px; border: 2px solid rgba(255,255,255,0.5); cursor: pointer; transition: background 0.2s; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+  .cup.filled { background: rgba(255,255,255,0.3); border-color: #fff; }
+
+  /* MAIN NAV */
+  .main-nav { display: flex; overflow-x: auto; background: #fff; border-bottom: 2px solid var(--borda); position: sticky; top: 0; z-index: 100; scrollbar-width: none; }
+  .main-nav::-webkit-scrollbar { display: none; }
+  .nav-btn { flex-shrink: 0; padding: 12px 16px; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; border: none; background: none; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s; white-space: nowrap; }
+  .nav-btn.active { color: var(--rosa); border-bottom-color: var(--rosa); }
+  .nav-btn:hover:not(.active) { color: var(--texto); }
+
+  /* SECTIONS */
+  .section { display: none; padding: 16px; max-width: 600px; margin: 0 auto; }
+  .section.active { display: block; }
+
+  /* DAY SELECTOR */
+  .day-nav { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 16px; scrollbar-width: none; }
+  .day-nav::-webkit-scrollbar { display: none; }
+  .day-btn { flex-shrink: 0; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 2px solid var(--borda); background: #fff; color: var(--muted); cursor: pointer; transition: all 0.2s; }
+  .day-btn.active { background: var(--rosa); border-color: var(--rosa); color: #fff; }
+
+  .day-plan { display: none; }
+  .day-plan.active { display: block; }
+
+  /* MEAL ACCORDION */
+  .meal { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 10px; overflow: hidden; }
+  .meal-header { display: flex; align-items: center; gap: 12px; padding: 14px 16px; cursor: pointer; }
+  .meal-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .meal-info { flex: 1; }
+  .meal-time { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--muted); }
+  .meal-title { font-size: 15px; font-weight: 600; color: var(--texto); }
+  .meal-chevron { font-size: 16px; color: var(--muted); transition: transform 0.3s; }
+  .meal.open .meal-chevron { transform: rotate(180deg); }
+  .meal-body { display: none; padding: 0 16px 16px; border-top: 1px solid var(--borda); }
+  .meal.open .meal-body { display: block; }
+
+  /* FOOD ITEMS */
+  .food-list { padding: 12px 0 4px; }
+  .food-item { display: flex; align-items: flex-start; gap: 8px; padding: 5px 0; font-size: 14px; }
+  .food-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--rosa); flex-shrink: 0; margin-top: 6px; }
+
+  /* SUBS */
+  .subs-title { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--muted); margin: 12px 0 6px; }
+  .sub-item { display: flex; align-items: flex-start; gap: 8px; padding: 4px 0; font-size: 13px; color: #555; }
+  .sub-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--verde); flex-shrink: 0; margin-top: 6px; }
+
+  /* DICA */
+  .dica-box { background: var(--rosa-claro); border-left: 4px solid var(--rosa); border-radius: 0 8px 8px 0; padding: 10px 12px; margin-top: 12px; font-size: 13px; color: #5a2d3a; }
+  .dica-box strong { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+
+  /* RECEITA */
+  .receita-box { background: var(--verde-claro); border-radius: 10px; padding: 12px; margin-top: 12px; }
+  .receita-box h4 { font-size: 13px; font-weight: 700; color: var(--verde); margin-bottom: 8px; }
+  .receita-box p, .receita-box li { font-size: 13px; color: #2d5040; line-height: 1.7; }
+  .receita-box ul, .receita-box ol { padding-left: 18px; }
+
+  /* CARDS GERAIS */
+  .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; margin-bottom: 12px; }
+  .card h3 { font-size: 16px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .card p, .card li { font-size: 14px; line-height: 1.7; color: #444; }
+  .card ul, .card ol { padding-left: 20px; }
+  .card li { margin-bottom: 5px; }
+
+  /* BADGE COLORS */
+  .badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.3px; }
+  .badge-rosa { background: var(--rosa-claro); color: var(--rosa); }
+  .badge-verde { background: var(--verde-claro); color: var(--verde); }
+  .badge-laranja { background: #FEF0E8; color: var(--laranja); }
+  .badge-roxo { background: #F0EBF8; color: var(--roxo); }
+
+  /* ICON BG COLORS */
+  .bg-rosa { background: var(--rosa-claro); }
+  .bg-verde { background: var(--verde-claro); }
+  .bg-laranja { background: #FEF0E8; }
+  .bg-roxo { background: #F0EBF8; }
+  .bg-azul { background: #E8F0F8; }
+
+  /* SECTION TITLE */
+  .section-title { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 10px; padding-bottom: 6px; border-bottom: 2px solid var(--borda); }
+
+  /* CONGELAMENTO GRID */
+  .freeze-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .freeze-card { background: var(--card); border-radius: 12px; padding: 14px; box-shadow: var(--shadow); text-align: center; }
+  .freeze-card .icon { font-size: 28px; margin-bottom: 6px; }
+  .freeze-card h4 { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .freeze-card p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .freeze-card .time { font-size: 11px; font-weight: 700; color: var(--azul); background: #E8F0F8; border-radius: 6px; padding: 2px 6px; display: inline-block; margin-top: 6px; }
+
+  /* ATIVIDADE CARDS */
+  .ativ-card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; margin-bottom: 10px; display: flex; gap: 14px; align-items: flex-start; }
+  .ativ-icon { font-size: 32px; flex-shrink: 0; }
+  .ativ-info h4 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .ativ-info p { font-size: 13px; color: #555; line-height: 1.6; }
+  .ativ-meta { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+
+  /* SELETIVIDADE */
+  .selet-card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; margin-bottom: 10px; border-left: 4px solid var(--rosa); }
+  .selet-card h4 { font-size: 15px; font-weight: 700; color: var(--rosa); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .selet-card p { font-size: 14px; color: #444; line-height: 1.7; margin-bottom: 6px; }
+  .selet-card ul { padding-left: 20px; }
+  .selet-card li { font-size: 14px; color: #444; margin-bottom: 4px; }
+  .highlight-box { background: #FFF8E7; border: 1px solid #F0D080; border-radius: 10px; padding: 12px; margin-top: 12px; font-size: 13px; color: #6B5100; }
+  .highlight-box strong { display: block; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* ORIENTAÇÕES */
+  .orient-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--borda); }
+  .orient-item:last-child { border-bottom: none; }
+  .orient-emoji { font-size: 24px; flex-shrink: 0; }
+  .orient-text h4 { font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+  .orient-text p { font-size: 13px; color: #555; line-height: 1.6; }
+
+  /* FOOTER */
+  footer { background: var(--rosa); color: rgba(255,255,255,0.9); text-align: center; padding: 16px; font-size: 12px; margin-top: 24px; }
+
+  @media (max-width: 380px) {
+    .freeze-grid { grid-template-columns: 1fr; }
+    header h1 { font-size: 19px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Mylena Cristina · Nutricionista Materno-Infantil · CRN-11 17328/P</div>
+  <h1>🥗 Plano Alimentar</h1>
+  <p>Laura de Oliveira Henrique · 10 anos</p>
+  <div class="header-meta">
+    <span class="meta-pill">📅 14/08/2026</span>
+    <span class="meta-pill">💧 2,3L de água</span>
+  </div>
+</header>
+
+<div class="water-bar">
+  <span>🥤 Água hoje:</span>
+  <div class="water-cups" id="cups"></div>
+  <span id="water-label" style="font-size:12px;opacity:0.85"></span>
+</div>
+
+<nav class="main-nav">
+  <button class="nav-btn active" onclick="showSection('plano', this)">📋 Plano</button>
+  <button class="nav-btn" onclick="showSection('praticidade', this)">⚡ Praticidade</button>
+  <button class="nav-btn" onclick="showSection('congelamento', this)">🧊 Congelamento</button>
+  <button class="nav-btn" onclick="showSection('atividades', this)">🏃 Atividades</button>
+  <button class="nav-btn" onclick="showSection('seletividade', this)">💛 Seletividade</button>
+  <button class="nav-btn" onclick="showSection('orientacoes', this)">📌 Orientações</button>
+</nav>
+
+<!-- ===================== PLANO ===================== -->
+<div class="section active" id="plano">
+  <div class="day-nav">
+    <button class="day-btn active" onclick="showDay('seg', this)">Seg</button>
+    <button class="day-btn" onclick="showDay('ter', this)">Ter</button>
+    <button class="day-btn" onclick="showDay('qua', this)">Qua</button>
+    <button class="day-btn" onclick="showDay('qui', this)">Qui</button>
+    <button class="day-btn" onclick="showDay('sex', this)">Sex</button>
+    <button class="day-btn" onclick="showDay('sab', this)">Sáb</button>
+    <button class="day-btn" onclick="showDay('dom', this)">Dom</button>
+  </div>
+
+  <!-- SEGUNDA -->
+  <div class="day-plan active" id="day-seg">
+
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header">
+        <div class="meal-icon bg-laranja">🌅</div>
+        <div class="meal-info">
+          <div class="meal-time">05:30</div>
+          <div class="meal-title">Café da Manhã</div>
+        </div>
+        <span class="meal-chevron">▾</span>
+      </div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Pão integral · 2 fatias</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Pasta de amendoim · 1 col. sopa</span></div>
+        </div>
+        <div class="subs-title">Substituições do pão</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Tapioca · 2 col. sopa de goma</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Wrap integral · 1 unidade</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Batata doce cozida · 140g (5 col. sopa)</span></div>
+        <div class="subs-title">Substituições da pasta de amendoim</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Mix de castanhas trituradas · 1 col. sopa cheia</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Abacate amassado · 2 col. sopa cheias (45g)</span></div>
+        <div class="dica-box"><strong>💡 Dica da lancheira</strong>Embalar o pão e o recheio em recipientes separados (Laura monta na hora). Wraps resistem melhor ao transporte que pão de hambúrguer. Recheios secos (frango desfiado, carne moída sem molho) não amolecem.</div>
+        <div class="dica-box"><strong>🍽️ Comer mais devagar</strong>Combinar a "regra do apoiar": apoiar o garfo no prato entre cada garfada antes de pegar a próxima porção. Evitar telas durante as refeições.</div>
+      </div>
+    </div>
+
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header">
+        <div class="meal-icon bg-rosa">🎒</div>
+        <div class="meal-info">
+          <div class="meal-time">09:00</div>
+          <div class="meal-title">Lancheira</div>
+        </div>
+        <span class="meal-chevron">▾</span>
+      </div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Vitamina de mamão · 240ml (leite integral + 1 fatia média de mamão)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Leite em pó desnatado · 2 col. sopa (misturar na vitamina)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Bolo de maçã e canela · 1 fatia</span></div>
+        </div>
+        <div class="subs-title">Substituições da vitamina</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Smoothie de morango · 200ml leite integral + 5 morangos médios + 2 col. sopa de leite em pó</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Iogurte batido com mamão e aveia · 1 pote iogurte natural + 1 fatia mamão + 1 col. sopa cheia de aveia</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Vitamina de kiwi · 200ml leite integral + 1 kiwi grande + 2 col. sopa de leite em pó desnatado</span></div>
+        <div class="subs-title">Substituições do bolo</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Crepioca doce com banana e canela · 1 ovo + 2 col. sopa de goma de tapioca + ⅓ banana média amassada + canela</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Bolo caseiro de banana e aveia · 3 bananas + 2 ovos + 1 xíc. aveia + canela · rende 8 fatias, servir 1</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Cookie de aveia e banana · 1 ovo + 2 col. sopa aveia + ½ banana pequena + canela · rende 8, servir 3</span></div>
+        <div class="dica-box"><strong>🏃 Atividade em casa</strong>Nos dias sem academia: 15 min de pular corda (4-6 kcal/min) ou circuito com 4 estações (polichinelos, agachamento, corrida parada, prancha 15s), repetir 3 vezes com descanso curto. Usar cronômetro ou música aumenta a adesão.</div>
+      </div>
+    </div>
+
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header">
+        <div class="meal-icon bg-verde">🍽️</div>
+        <div class="meal-info">
+          <div class="meal-time">11:30</div>
+          <div class="meal-title">Almoço</div>
+        </div>
+        <span class="meal-chevron">▾</span>
+      </div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Macarrão cozido · 2 pegadores (220g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Frango grelhado desfiado · 1 bife (100g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Chips de vegetais assados · à vontade</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Azeite de oliva extra virgem · 1 col. sobremesa (8ml)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Sobremesa: Uva · 15 unidades (110g)</span></div>
+        </div>
+        <div class="subs-title">Substituições do macarrão</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Arroz branco + feijão carioca · 6 col. sopa de arroz + 1 concha de feijão</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Macaxeira cozida · 4 pedaços médios (220g)</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Cuscuz de milho · 6 col. sopa (150g)</span></div>
+        <div class="subs-title">Substituições do frango</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Bife bovino magro grelhado · 1 bife médio fino (80g)</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Peixe grelhado · 1 filé médio (125g)</span></div>
+        <div class="subs-title">Substituição do azeite</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Castanha-de-caju triturada · 1 col. sopa cheia (15g)</span></div>
+        <div class="subs-title">Substituições da uva</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Maçã com casca · 1 unidade pequena (110g)</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Morango · 14 unidades médias (220g)</span></div>
+        <div class="dica-box"><strong>🍫 Ansiedade e doces</strong>Quando a vontade de doce surgir fora de horário, oferecer morango ou kiwi com 1 col. chá de pasta de amendoim. Valide o sentimento primeiro: "tá com vontade de algo gostoso, né?" antes de redirecionar.</div>
+      </div>
+    </div>
+
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header">
+        <div class="meal-icon bg-roxo">🥤</div>
+        <div class="meal-info">
+          <div class="meal-time">15:00</div>
+          <div class="meal-title">Lanche da Tarde</div>
+        </div>
+        <span class="meal-chevron">▾</span>
+      </div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Salada de frutas simples (4 opções) · 1 xícara de chá (250g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Iogurte natural · 1 pote (170g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Leite em pó desnatado · 2 col. sopa (misturar no iogurte)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Aveia em flocos · 2 col. sopa (16g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Castanha-de-caju · 3 unidades</span></div>
+        </div>
+        <div class="subs-title">Substituições da salada de frutas</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Mamão formosa picado · 8 col. sopa (160g)</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Maçã picada com canela · 1 unidade</span></div>
+        <div class="subs-title">Substituição do iogurte + leite em pó</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Leite integral batido com leite em pó · 1 copo americano (200ml) + 2 col. sopa de leite em pó</span></div>
+        <div class="subs-title">Substituição da aveia</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Granola sem açúcar · 2 col. sopa</span></div>
+        <div class="subs-title">Substituição da castanha</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Castanha-do-pará · 1 unidade</span></div>
+      </div>
+    </div>
+
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header">
+        <div class="meal-icon bg-azul">🌙</div>
+        <div class="meal-info">
+          <div class="meal-time">18:00</div>
+          <div class="meal-title">Jantar</div>
+        </div>
+        <span class="meal-chevron">▾</span>
+      </div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Macaxeira assada · 2 pedaços (150g / ~5 rodelas de 2cm)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Muffin rápido de peixe · 1 unidade (60g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Ovo de galinha · 1 unidade</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Salada ou verdura crua · à vontade</span></div>
+        </div>
+        <div class="subs-title">Substituições da macaxeira</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Arroz branco · 3 col. sopa</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Cuscuz de milho · 3 col. sopa</span></div>
+        <div class="subs-title">Substituições do muffin</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Bolinho assado de frango · 1 unidade (frango desfiado + ovo + aveia · airfryer)</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Hambúrguer caseiro de peixe · 1 unidade pequena (60g)</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Panqueca salgada de frango · 1 unidade (frango desfiado + ovo + aveia)</span></div>
+        <div class="subs-title">Substituições do ovo</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Queijo minas frescal · 1 fatia média (30g)</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Frango desfiado · 2 col. sopa cheias (40g)</span></div>
+        <div class="receita-box">
+          <h4>🐟 Receita: Muffin Rápido de Peixe</h4>
+          <ul>
+            <li>2 ovos</li>
+            <li>3 col. sopa de peixe cozido desfiado (salmão, sardinha, atum, peixe branco)</li>
+            <li>Azeite, alho, pimenta, limão, alecrim a gosto</li>
+            <li>Gergelim opcional</li>
+          </ul>
+          <p style="margin-top:8px"><strong>Preparo:</strong> Doure alho no azeite, adicione peixe e refogue 5 min. Misture os ovos e coloque nas forminhas de silicone. Assar 15 min a 200°C. <em>Congela bem em porções de 3 unidades.</em></p>
+        </div>
+        <div class="dica-box"><strong>📦 Praticidade</strong>Muffins e macaxeira podem ser preparados no domingo para toda a semana. Muffins: descongelar no micro-ondas em 2-3 min. Macaxeira: pré-cozida, assar na airfryer na hora.</div>
+      </div>
+    </div>
+  </div><!-- /day-seg -->
+
+  <!-- TERÇA -->
+  <div class="day-plan" id="day-ter">
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header"><div class="meal-icon bg-laranja">🌅</div><div class="meal-info"><div class="meal-time">05:30</div><div class="meal-title">Café da Manhã</div></div><span class="meal-chevron">▾</span></div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Pão de leite caseiro na airfryer · 1 ovo + 2 col. sopa de leite em pó + 2 col. sopa de aveia em flocos + fermento</span></div>
+        </div>
+        <div class="receita-box">
+          <h4>🍞 Receita: Pão de Leite</h4>
+          <p>Bata todos os ingredientes até mistura homogênea. Coloque em forminhas de silicone e asse na airfryer 10 min a 180°C.</p>
+        </div>
+        <div class="subs-title">Substituição da aveia na massa</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Metade de uma banana amassada</span></div>
+        <div class="subs-title">Substituições do pão de leite</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Cuscuz com ovo · 4 col. sopa de cuscuz cozido (100g) + 1 ovo cozido</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Tapioca com ovo mexido · 2 col. sopa de goma (30g) + 1 ovo mexido</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Pão integral com pasta de amendoim · 2 fatias + 1 col. sopa</span></div>
+        <div class="dica-box"><strong>🎮 Atividades em casa</strong>Dança com vídeo do YouTube, circuito de pega-pega com irmãos/primos.</div>
+      </div>
+    </div>
+
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header"><div class="meal-icon bg-rosa">🎒</div><div class="meal-info"><div class="meal-time">09:00</div><div class="meal-title">Lancheira</div></div><span class="meal-chevron">▾</span></div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Cuscuz de milho cozido · 4 col. sopa (100g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Queijo minas frescal · 1 fatia (30g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Ovo de galinha · 1 unidade (cozido)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Suco de uva integral · 300ml</span></div>
+        </div>
+        <div class="subs-title">Substituições do cuscuz</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Tapioca · 2 col. sopa de goma (30g)</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Pão integral · 2 fatias (50g)</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Batata doce cozida · 5 col. sopa (140g)</span></div>
+        <div class="subs-title">Substituições do ovo</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Frango desfiado · 2 col. sopa cheias (40g)</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Omelete simples · 1 ovo + 1 col. chá de azeite + temperos</span></div>
+        <div class="subs-title">Substituições do queijo</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Mussarela · 1 fatia e meia (25g)</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Ricota fresca · 2 col. sopa (40g)</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Queijo coalho · 1 fatia fina (25g)</span></div>
+        <div class="subs-title">Substituições do suco de uva</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Suco de laranja natural · 1 copo cheio (450ml)</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Suco de manga natural · 400ml</span></div>
+      </div>
+    </div>
+
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header"><div class="meal-icon bg-verde">🍽️</div><div class="meal-info"><div class="meal-time">11:30</div><div class="meal-title">Almoço</div></div><span class="meal-chevron">▾</span></div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Arroz branco · 6 col. sopa cheia (150g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Feijão preto · 5 col. sopa (90g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Batata doce assada · 1 rodela (70g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Peito de frango grelhado · 1 bife (100g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Salada ou verdura cozida · à vontade</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Sobremesa: Uva · 15 unidades</span></div>
+        </div>
+        <div class="dica-box"><strong>🥗 Sugestão de salada</strong>Couve crisp e abóbora assada.</div>
+        <div class="subs-title">Substituições do arroz</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Macarrão cozido · 1 pegador e meio (140g)</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Cuscuz de milho · 6 col. sopa</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Macaxeira cozida · 5 rodelas de 2cm (140g)</span></div>
+        <div class="subs-title">Substituições do feijão</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Lentilha cozida · 4 col. sopa (80g)</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Grão-de-bico cozido · 3 col. sopa (60g)</span></div>
+        <div class="subs-title">Substituições do frango</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Bife bovino magro grelhado · 1 bife médio fino (80g)</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Peixe grelhado · 1 filé médio (125g)</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Carne moída magra refogada · 5 col. sopa (100g)</span></div>
+        <div class="subs-title">Substituições da batata doce</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Macaxeira cozida · 1 rodela de 2cm (30g)</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Milho verde cozido · 2 col. sopa (50g)</span></div>
+        <div class="dica-box"><strong>🍬 Kit belisco</strong>Montar um "kit belisco" na geladeira: morangos cortados, palitos de cenoura com pasta de amendoim, uvas congeladas (viram "sorvete" natural). Quando a vontade surgir, ela pode comer sem culpa.</div>
+      </div>
+    </div>
+
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header"><div class="meal-icon bg-roxo">🍗</div><div class="meal-info"><div class="meal-time">15:00</div><div class="meal-title">Lanche da Tarde</div></div><span class="meal-chevron">▾</span></div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Coxinha de frango assada · 4 unidades pequenas</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Melancia · 1 fatia (150g de polpa)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Iogurte natural · 1 unidade (170g)</span></div>
+        </div>
+        <div class="receita-box">
+          <h4>🍗 Receita: Coxinha Saudável (2 ingredientes)</h4>
+          <ul>
+            <li>300g de batata cozida e amassada (purê)</li>
+            <li>300g de peito de frango cozido desfiado</li>
+            <li>Farinha de linhaça ou aveia para empanar (opcional)</li>
+          </ul>
+          <p style="margin-top:8px"><strong>Preparo:</strong> Misture batata com frango. Molde em coxinhas pequenas. Empane na farinha. Airfryer a 180°C por 15 min. <em>Pode ser congelada crua — direto do congelador para a airfryer.</em></p>
+        </div>
+        <div class="subs-title">Substituições da melancia</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Mamão formosa picado · 5 col. sopa (100g)</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Uva · 12 unidades (88g)</span></div>
+        <div class="subs-title">Substituição do iogurte</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Leite desnatado · 1 copo americano (200ml)</span></div>
+        <div class="dica-box"><strong>📦 Congelamento</strong>Congelar coxinhas em porções de 4 unidades. Tirar do congelador direto para a airfryer. As coxinhas são assadas, não fritas.</div>
+      </div>
+    </div>
+
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header"><div class="meal-icon bg-azul">🌙</div><div class="meal-info"><div class="meal-time">18:00</div><div class="meal-title">Jantar</div></div><span class="meal-chevron">▾</span></div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Pão francês · 1 unidade (50g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Queijo muçarela · 2 fatias (40g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Ovo mexido · 1 unidade + 1 col. chá de azeite</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Sobremesa: Uva · 15 unidades</span></div>
+        </div>
+        <div class="dica-box"><strong>💡 Dica de preparo</strong>Coloque uma fatia de queijo na metade do pão e leve à frigideira até o queijo derreter e tostar. A Laura vai adorar!</div>
+        <div class="subs-title">Substituições do pão</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Pão integral · 2 fatias (50g)</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Wrap integral · 1 unidade (45g)</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Cuscuz de milho · 5 col. sopa (120g)</span></div>
+        <div class="subs-title">Substituições do queijo</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Queijo minas frescal · 2 fatias médias (50g)</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Queijo coalho · 2 fatias finas (35g)</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Ricota fresca · 3 col. sopa (50g)</span></div>
+        <div class="subs-title">Substituições do ovo</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Frango desfiado · 3 col. sopa (45g)</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Atum drenado · 3 col. sopa (45g)</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Ovo cozido fatiado · 1 unidade</span></div>
+        <div class="subs-title">Substituição da uva</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Maçã com casca · 1 unidade pequena (110g)</span></div>
+      </div>
+    </div>
+  </div><!-- /day-ter -->
+
+  <!-- QUARTA -->
+  <div class="day-plan" id="day-qua">
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header"><div class="meal-icon bg-laranja">🌅</div><div class="meal-info"><div class="meal-time">05:30</div><div class="meal-title">Café da Manhã</div></div><span class="meal-chevron">▾</span></div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Vitamina de banana com morango · 1 banana média + 4 morangos + 3 col. sopa de leite em pó + água/leite</span></div>
+        </div>
+        <div class="dica-box"><strong>💡 Dica</strong>Prefira bananas e morangos bem maduros para evitar a adição de açúcar na vitamina.</div>
+      </div>
+    </div>
+
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header"><div class="meal-icon bg-rosa">🎒</div><div class="meal-info"><div class="meal-time">09:00</div><div class="meal-title">Lancheira</div></div><span class="meal-chevron">▾</span></div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Crepioca cremosa · 1 ovo + 3 col. sopa de goma de tapioca + 1 col. sopa de requeijão</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Queijo coalho · 2 fatias</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Uva · 15 unidades</span></div>
+        </div>
+        <div class="receita-box">
+          <h4>🥞 Receita: Crepioca Cremosa</h4>
+          <ol>
+            <li>Quebre o ovo e misture até gema e clara ficarem homogêneas</li>
+            <li>Adicione goma de tapioca e sal, misture bem</li>
+            <li>Adicione requeijão e misture novamente</li>
+            <li>Frigideira untada com azeite, dourar dos dois lados</li>
+          </ol>
+          <p style="margin-top:8px"><em>O queijo pode ser assado em cubinhos para variar o preparo.</em></p>
+        </div>
+        <div class="dica-box"><strong>🌡️ Lancheira</strong>Não adicione alimentos quentes no recipiente. Espere esfriar antes de fechar, para não amolecer a consistência dos alimentos.</div>
+      </div>
+    </div>
+
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header"><div class="meal-icon bg-verde">🍽️</div><div class="meal-info"><div class="meal-time">11:30</div><div class="meal-title">Almoço</div></div><span class="meal-chevron">▾</span></div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Arroz refogado com cenoura · 5 col. sopa (125g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Feijão · 4 col. sopa (72g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Batata inglesa assada · 4 col. sopa (120g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Peixe assado · 1 filé (120g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Salada ou verdura crua · à vontade</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Sobremesa: Tangerina · 1 unidade</span></div>
+        </div>
+        <div class="dica-box"><strong>🥗 Sugestão de salada</strong>Alface + pepino + tomate cereja.</div>
+        <div class="dica-box"><strong>🐟 Sugestão de preparo</strong>Peixe assado refogado com legumes (brócolis, pimentão, cebola). ATENÇÃO: não precisar expor os legumes junto do peixe de início. Apresentar 1 alimento novo de cada vez. Adicionar 2 tomates cereja no prato para Laura conhecer — ela não precisa comer na primeira apresentação.</div>
+      </div>
+    </div>
+
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header"><div class="meal-icon bg-roxo">🥞</div><div class="meal-info"><div class="meal-time">15:00</div><div class="meal-title">Lanche da Tarde</div></div><span class="meal-chevron">▾</span></div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Panqueca de aveia, banana e cacau · 1 unidade</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Castanha-de-caju · 5 unidades</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Bebida láctea proteica · 1 unidade</span></div>
+        </div>
+        <div class="receita-box">
+          <h4>🥞 Receita: Panqueca de Banana com Cacau</h4>
+          <ul>
+            <li>1 banana madura</li>
+            <li>1 ovo de galinha</li>
+            <li>2 col. sopa de goma de tapioca</li>
+            <li>1 col. sopa de aveia em flocos finos</li>
+            <li>1 col. sobremesa de cacau em pó 32%</li>
+          </ul>
+          <p style="margin-top:8px"><strong>Preparo:</strong> Amasse a banana, adicione ovo, misture. Adicione goma e aveia, misture. Adicione cacau e misture. Frigideira com azeite, dourar dos dois lados. <em>O cacau 32% tem sabor próximo ao achocolatado.</em></p>
+        </div>
+        <div class="dica-box"><strong>🥛 Bebidas proteicas sugeridas</strong>Danone YoPro · Italac Whey Protein · Betânia YoBem</div>
+      </div>
+    </div>
+
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header"><div class="meal-icon bg-azul">🌙</div><div class="meal-info"><div class="meal-time">18:00</div><div class="meal-title">Jantar</div></div><span class="meal-chevron">▾</span></div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Arroz à grega · 4 col. sopa</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Macaxeira assada · 1 pedaço (100g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Hambúrguer de carne bovina assado · 1 unidade (56g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Salada ou verdura · à vontade</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Sobremesa: Laranja · 1 unidade</span></div>
+        </div>
+        <div class="dica-box"><strong>🥗 Sugestão de salada</strong>Couve manteiga refogada + pepino.</div>
+        <div class="dica-box"><strong>💡 Dica</strong>Arroz refogado com cenoura e milho. Adicione pequenas quantidades de novos alimentos, deixe Laura se sentir à vontade para explorar.</div>
+        <div class="receita-box">
+          <h4>🍔 Sugestões de preparo do hambúrguer</h4>
+          <p><strong>Hambúrguer caseiro:</strong> 1 pão de hambúrguer + 1 ovo + 1 fatia muçarela + carne caseira + alface + pepino + tomate</p>
+          <p style="margin-top:6px"><strong>Rap 10:</strong> 1 Rap 10 + carne caseira + alface + pepino. Molho: requeijão + mostarda + limão + tempero a gosto.</p>
+        </div>
+      </div>
+    </div>
+  </div><!-- /day-qua -->
+
+  <!-- QUINTA = mesmo que segunda -->
+  <div class="day-plan" id="day-qui">
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header"><div class="meal-icon bg-laranja">🌅</div><div class="meal-info"><div class="meal-time">05:30</div><div class="meal-title">Café da Manhã</div></div><span class="meal-chevron">▾</span></div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Pão integral · 2 fatias</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Pasta de amendoim · 1 col. sopa</span></div>
+        </div>
+        <div class="subs-title">Substituições do pão</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Tapioca · 2 col. sopa de goma</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Wrap integral · 1 unidade</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Batata doce cozida · 5 col. sopa (140g)</span></div>
+        <div class="subs-title">Substituições da pasta de amendoim</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Mix de castanhas trituradas · 1 col. sopa cheia</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Abacate amassado · 2 col. sopa cheias (45g)</span></div>
+      </div>
+    </div>
+
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header"><div class="meal-icon bg-rosa">🎒</div><div class="meal-info"><div class="meal-time">09:00</div><div class="meal-title">Lancheira</div></div><span class="meal-chevron">▾</span></div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Vitamina de mamão · 240ml</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Leite em pó desnatado · 2 col. sopa</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Bolo de maçã e canela · 1 fatia</span></div>
+        </div>
+        <div class="subs-title">Substituições da vitamina</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Smoothie de morango · 200ml leite + 5 morangos + 2 col. sopa leite em pó</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Iogurte batido com mamão e aveia · 1 pote + 1 fatia mamão + 1 col. sopa aveia</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Vitamina de kiwi · 200ml leite + 1 kiwi grande + 2 col. sopa leite em pó</span></div>
+        <div class="subs-title">Substituições do bolo</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Crepioca doce com banana e canela</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Bolo caseiro de banana e aveia (1 fatia)</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Cookie de aveia e banana (3 unidades pequenas)</span></div>
+      </div>
+    </div>
+
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header"><div class="meal-icon bg-verde">🍽️</div><div class="meal-info"><div class="meal-time">11:30</div><div class="meal-title">Almoço</div></div><span class="meal-chevron">▾</span></div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Macarrão cozido · 2 pegadores (220g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Frango grelhado desfiado · 1 bife (100g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Chips de vegetais assados · à vontade</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Azeite de oliva · 1 col. sobremesa (8ml)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Sobremesa: Uva · 15 unidades</span></div>
+        </div>
+        <div class="subs-title">Substituições — igual à segunda-feira</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Arroz + feijão · 6 col. sopa + 1 concha</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Macaxeira · 4 pedaços médios (220g)</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Cuscuz · 6 col. sopa</span></div>
+      </div>
+    </div>
+
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header"><div class="meal-icon bg-roxo">🥤</div><div class="meal-info"><div class="meal-time">15:00</div><div class="meal-title">Lanche da Tarde</div></div><span class="meal-chevron">▾</span></div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Salada de frutas · 1 xícara de chá (250g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Iogurte natural · 1 pote + 2 col. sopa leite em pó</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Aveia em flocos · 2 col. sopa</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Castanha-de-caju · 3 unidades</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header"><div class="meal-icon bg-azul">🌙</div><div class="meal-info"><div class="meal-time">18:00</div><div class="meal-title">Jantar</div></div><span class="meal-chevron">▾</span></div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Macaxeira assada · 2 pedaços (150g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Muffin rápido de peixe · 1 unidade</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Ovo de galinha · 1 unidade</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Salada crua · à vontade</span></div>
+        </div>
+        <div class="dica-box"><strong>📦</strong>Muffins e macaxeira preparados no domingo rendem a semana inteira.</div>
+      </div>
+    </div>
+  </div><!-- /day-qui -->
+
+  <!-- SEXTA = mesmo que quarta -->
+  <div class="day-plan" id="day-sex">
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header"><div class="meal-icon bg-laranja">🌅</div><div class="meal-info"><div class="meal-time">05:30</div><div class="meal-title">Café da Manhã</div></div><span class="meal-chevron">▾</span></div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Vitamina de banana com morango · 1 banana + 4 morangos + 3 col. sopa leite em pó</span></div>
+        </div>
+        <div class="dica-box"><strong>💡</strong>Bananas e morangos bem maduros evitam a necessidade de açúcar.</div>
+      </div>
+    </div>
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header"><div class="meal-icon bg-rosa">🎒</div><div class="meal-info"><div class="meal-time">09:00</div><div class="meal-title">Lancheira</div></div><span class="meal-chevron">▾</span></div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Crepioca cremosa · 1 ovo + 3 col. sopa goma + 1 col. sopa requeijão</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Queijo coalho · 2 fatias</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Uva · 15 unidades</span></div>
+        </div>
+        <div class="dica-box"><strong>🌡️</strong>Não adicione alimentos quentes no recipiente da lancheira. Espere esfriar.</div>
+      </div>
+    </div>
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header"><div class="meal-icon bg-verde">🍽️</div><div class="meal-info"><div class="meal-time">11:30</div><div class="meal-title">Almoço</div></div><span class="meal-chevron">▾</span></div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Arroz refogado com cenoura · 5 col. sopa</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Feijão · 4 col. sopa</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Batata inglesa assada · 4 col. sopa (120g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Peixe assado · 1 filé (120g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Salada · à vontade</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Sobremesa: Tangerina · 1 unidade</span></div>
+        </div>
+        <div class="dica-box"><strong>🐟 Exposição gradual</strong>Apresentar legumes refogados ao lado do peixe, 1 alimento por vez. 2 tomates cereja no prato — só para conhecer, sem pressão.</div>
+      </div>
+    </div>
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header"><div class="meal-icon bg-roxo">🥞</div><div class="meal-info"><div class="meal-time">15:00</div><div class="meal-title">Lanche da Tarde</div></div><span class="meal-chevron">▾</span></div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Panqueca de aveia, banana e cacau · 1 unidade</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Castanha-de-caju · 5 unidades</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Bebida láctea proteica · 1 unidade</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header"><div class="meal-icon bg-azul">🌙</div><div class="meal-info"><div class="meal-time">18:00</div><div class="meal-title">Jantar</div></div><span class="meal-chevron">▾</span></div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Arroz à grega · 4 col. sopa</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Macaxeira assada · 1 pedaço (100g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Hambúrguer de carne bovina assado · 1 unidade (56g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Salada · à vontade</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Sobremesa: Laranja · 1 unidade</span></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /day-sex -->
+
+  <!-- SÁBADO = mesmo que terça -->
+  <div class="day-plan" id="day-sab">
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header"><div class="meal-icon bg-laranja">🌅</div><div class="meal-info"><div class="meal-time">05:30</div><div class="meal-title">Café da Manhã</div></div><span class="meal-chevron">▾</span></div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Pão de leite caseiro · 1 ovo + 2 col. sopa leite em pó + 2 col. sopa aveia + fermento · airfryer 10min a 180°C</span></div>
+        </div>
+        <div class="subs-title">Substituições</div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Cuscuz com ovo · 4 col. sopa cuscuz + 1 ovo cozido</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Tapioca com ovo mexido · 2 col. sopa goma + 1 ovo</span></div>
+        <div class="sub-item"><span class="sub-dot"></span><span>Pão integral com pasta de amendoim · 2 fatias + 1 col. sopa</span></div>
+      </div>
+    </div>
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header"><div class="meal-icon bg-rosa">🎒</div><div class="meal-info"><div class="meal-time">09:00</div><div class="meal-title">Lancheira</div></div><span class="meal-chevron">▾</span></div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Cuscuz · 4 col. sopa (100g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Queijo minas frescal · 1 fatia (30g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Ovo cozido · 1 unidade</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Suco de uva integral · 300ml</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header"><div class="meal-icon bg-verde">🍽️</div><div class="meal-info"><div class="meal-time">11:30</div><div class="meal-title">Almoço</div></div><span class="meal-chevron">▾</span></div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Arroz branco · 6 col. sopa cheia</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Feijão preto · 5 col. sopa</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Batata doce assada · 1 rodela (70g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Frango grelhado · 1 bife (100g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Salada · à vontade</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Sobremesa: Uva · 15 unidades</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header"><div class="meal-icon bg-roxo">🍗</div><div class="meal-info"><div class="meal-time">15:00</div><div class="meal-title">Lanche da Tarde</div></div><span class="meal-chevron">▾</span></div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Coxinha de frango assada · 4 unidades pequenas</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Melancia · 1 fatia (150g polpa)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Iogurte natural · 1 pote</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header"><div class="meal-icon bg-azul">🌙</div><div class="meal-info"><div class="meal-time">18:00</div><div class="meal-title">Jantar</div></div><span class="meal-chevron">▾</span></div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Pão francês · 1 unidade</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Queijo muçarela · 2 fatias (40g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Ovo mexido · 1 unidade</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Sobremesa: Uva · 15 unidades</span></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /day-sab -->
+
+  <!-- DOMINGO = mesmo que quarta -->
+  <div class="day-plan" id="day-dom">
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header"><div class="meal-icon bg-laranja">🌅</div><div class="meal-info"><div class="meal-time">05:30</div><div class="meal-title">Café da Manhã</div></div><span class="meal-chevron">▾</span></div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Vitamina de banana com morango · 1 banana + 4 morangos + 3 col. sopa leite em pó</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header"><div class="meal-icon bg-rosa">🎒</div><div class="meal-info"><div class="meal-time">09:00</div><div class="meal-title">Lancheira / Café reforçado</div></div><span class="meal-chevron">▾</span></div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Crepioca cremosa · 1 ovo + 3 col. sopa goma + 1 col. sopa requeijão</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Queijo coalho · 2 fatias</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Uva · 15 unidades</span></div>
+        </div>
+        <div class="dica-box"><strong>🗓️ Domingo = dia de prep</strong>Preparar muffins de peixe, coxinhas e frango desfiado para a semana inteira. Consulte a aba Congelamento.</div>
+      </div>
+    </div>
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header"><div class="meal-icon bg-verde">🍽️</div><div class="meal-info"><div class="meal-time">11:30</div><div class="meal-title">Almoço</div></div><span class="meal-chevron">▾</span></div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Arroz refogado com cenoura · 5 col. sopa</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Feijão · 4 col. sopa</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Batata inglesa assada · 4 col. sopa (120g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Peixe assado · 1 filé (120g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Salada · à vontade</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Sobremesa: Tangerina · 1 unidade</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header"><div class="meal-icon bg-roxo">🥞</div><div class="meal-info"><div class="meal-time">15:00</div><div class="meal-title">Lanche da Tarde</div></div><span class="meal-chevron">▾</span></div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Panqueca de aveia, banana e cacau · 1 unidade</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Castanha-de-caju · 5 unidades</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Bebida láctea proteica · 1 unidade</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="meal" onclick="toggleMeal(this)">
+      <div class="meal-header"><div class="meal-icon bg-azul">🌙</div><div class="meal-info"><div class="meal-time">18:00</div><div class="meal-title">Jantar</div></div><span class="meal-chevron">▾</span></div>
+      <div class="meal-body">
+        <div class="food-list">
+          <div class="food-item"><span class="food-dot"></span><span>Arroz à grega · 4 col. sopa</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Macaxeira assada · 1 pedaço (100g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Hambúrguer de carne bovina · 1 unidade (56g)</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Salada · à vontade</span></div>
+          <div class="food-item"><span class="food-dot"></span><span>Sobremesa: Laranja · 1 unidade</span></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /day-dom -->
+
+</div><!-- /plano -->
+
+<!-- ===================== PRATICIDADE ===================== -->
+<div class="section" id="praticidade">
+  <p class="section-title">⚡ Dicas de Praticidade</p>
+
+  <div class="card">
+    <h3>🗓️ Prep de Domingo (1h resolve a semana)</h3>
+    <ul>
+      <li><strong>Muffins de peixe:</strong> fazer o dobro da receita, congelar em porções de 3</li>
+      <li><strong>Frango desfiado:</strong> cozinhar 500g, temperar, fracionar em 100g (5 dias de almoço/jantar resolvidos)</li>
+      <li><strong>Macaxeira:</strong> pré-cozinhar toda, porcionar, gelar. Assar na airfryer na hora</li>
+      <li><strong>Coxinhas:</strong> modelar cruas, congelar. Airfryer direto do congelador</li>
+      <li><strong>Bolo/cookie:</strong> fazer 1 receita, congelar em porções individuais</li>
+      <li><strong>Feijão:</strong> cozinhar panela cheia, congelar em conchas</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>🎒 Lancheira sem stress</h3>
+    <ul>
+      <li><strong>Pão + recheio separados:</strong> Laura monta na hora de comer — não amolece</li>
+      <li><strong>Nunca colocar alimento quente:</strong> esperar esfriar antes de fechar o pote</li>
+      <li><strong>Recipientes herméticos:</strong> evitam vazamentos e mantêm textura</li>
+      <li><strong>Wraps e tortilhas:</strong> resistem muito melhor ao transporte que pão</li>
+      <li><strong>Suco em garrafa térmica:</strong> mantém gelado e evita vazamento</li>
+      <li><strong>Vitamina/smoothie:</strong> preparar na noite anterior, guardar na garrafa térmica</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>💧 Hidratação (2,3L/dia)</h3>
+    <ul>
+      <li>Use o contador de copos no topo da página</li>
+      <li>Oferecer 1 copo de água 20-30 min antes das refeições principais</li>
+      <li>Durante a refeição: pequenos goles (não substituir mastigação)</li>
+      <li>Entre refeições: água pura, sem suco ou outros líquidos</li>
+      <li>Nos dias de academia: +300-500ml extra</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>🍽️ Mesa mais tranquila</h3>
+    <ul>
+      <li><strong>Regra do apoiar:</strong> apoiar o garfo entre cada garfada — combinar isso com Laura como um acordo, não uma regra</li>
+      <li><strong>Sem tela durante refeições:</strong> distração reduz percepção de volume</li>
+      <li><strong>Refeições em família:</strong> sempre que possível, toda a família à mesa</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>🍬 Kit belisco na geladeira</h3>
+    <p>Montar sempre disponível: morangos cortados, palitos de cenoura com pasta de amendoim, uvas congeladas (viram "sorvete" natural). Quando a vontade surgir, Laura pode comer desse kit livremente.</p>
+  </div>
+
+</div>
+
+<!-- ===================== CONGELAMENTO ===================== -->
+<div class="section" id="congelamento">
+  <p class="section-title">🧊 Guia de Congelamento</p>
+
+  <div class="card">
+    <h3>📋 Como usar este guia</h3>
+    <p>Domingo é o dia ideal para o prep semanal. Cada item abaixo mostra quanto tempo dura no congelador e como descongelar da forma certa para preservar sabor e textura.</p>
+  </div>
+
+  <div class="freeze-grid">
+    <div class="freeze-card">
+      <div class="icon">🐟</div>
+      <h4>Muffin de peixe</h4>
+      <p>Congelar em porções de 3. Já assado.</p>
+      <div class="time">⏱️ 2-3 min microondas</div>
+    </div>
+    <div class="freeze-card">
+      <div class="icon">🍗</div>
+      <h4>Coxinha de frango</h4>
+      <p>Congelar cru, modelado. Airfryer direto.</p>
+      <div class="time">⏱️ 15-20 min airfryer 180°C</div>
+    </div>
+    <div class="freeze-card">
+      <div class="icon">🥚</div>
+      <h4>Frango desfiado</h4>
+      <p>Porcionar em 100g. Usar em almoço, jantar e lancheira.</p>
+      <div class="time">⏱️ 3 min microondas</div>
+    </div>
+    <div class="freeze-card">
+      <div class="icon">🍞</div>
+      <h4>Pão de leite</h4>
+      <p>Congelar assado. Aquecer rápido.</p>
+      <div class="time">⏱️ 1 min microondas</div>
+    </div>
+    <div class="freeze-card">
+      <div class="icon">🥞</div>
+      <h4>Panquecas</h4>
+      <p>Papel manteiga entre cada uma. Congelar empilhadas.</p>
+      <div class="time">⏱️ 30s microondas</div>
+    </div>
+    <div class="freeze-card">
+      <div class="icon">🍰</div>
+      <h4>Bolo banana e aveia</h4>
+      <p>Fatias individuais embrulhadas em plástico.</p>
+      <div class="time">⏱️ 1 min microondas</div>
+    </div>
+    <div class="freeze-card">
+      <div class="icon">🍪</div>
+      <h4>Cookies de aveia</h4>
+      <p>Porções de 3 em saquinho. Descongela em temperatura ambiente.</p>
+      <div class="time">⏱️ 10 min temp. ambiente</div>
+    </div>
+    <div class="freeze-card">
+      <div class="icon">🫘</div>
+      <h4>Feijão cozido</h4>
+      <p>Congelar em conchas individuais. Usar ao longo da semana.</p>
+      <div class="time">⏱️ 3 min microondas</div>
+    </div>
+    <div class="freeze-card">
+      <div class="icon">🥔</div>
+      <h4>Macaxeira</h4>
+      <p>Pré-cozinhar, porcionar, gelar (não congelar). Assar na airfryer.</p>
+      <div class="time">⏱️ 10 min airfryer 200°C</div>
+    </div>
+    <div class="freeze-card">
+      <div class="icon">🍇</div>
+      <h4>Uvas congeladas</h4>
+      <p>Lavar, secar bem, congelar em saquinho. Viram "sorvete" saudável.</p>
+      <div class="time">⏱️ Comer direto do freezer</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <h3>⏰ Validade no Congelador</h3>
+    <ul>
+      <li>Frango cozido desfiado: até 3 meses</li>
+      <li>Muffins de peixe: até 2 meses</li>
+      <li>Coxinhas cruas: até 3 meses</li>
+      <li>Pão de leite assado: até 1 mês</li>
+      <li>Panquecas: até 2 meses</li>
+      <li>Bolo e cookies: até 3 meses</li>
+      <li>Feijão: até 3 meses</li>
+    </ul>
+    <div class="highlight-box" style="margin-top:10px">
+      <strong>💡 Dica de organização</strong>
+      Etiquetar os potes com nome do alimento e data. Usar primeiro o que foi congelado antes.
+    </div>
+  </div>
+</div>
+
+<!-- ===================== ATIVIDADES ===================== -->
+<div class="section" id="atividades">
+  <p class="section-title">🏃 Atividades em Casa</p>
+
+  <div class="card">
+    <h3>📅 Rotina da Laura</h3>
+    <p>Academia 3x/semana. Nos outros dias, 15-20 minutos de atividade em casa já fazem diferença real. O segredo é transformar em brincadeira, não em "exercício".</p>
+  </div>
+
+  <div class="ativ-card">
+    <div class="ativ-icon">🪢</div>
+    <div class="ativ-info">
+      <h4>Pular Corda</h4>
+      <p>Uma das melhores opções: alto gasto calórico (4-6 kcal/min), pouco espaço, qualquer hora. Desafio: quantas sem errar? Bater o recorde da semana anterior.</p>
+      <div class="ativ-meta"><span class="badge badge-verde">15-20 min</span><span class="badge badge-rosa">Qualquer espaço</span></div>
+    </div>
+  </div>
+
+  <div class="ativ-card">
+    <div class="ativ-icon">⚡</div>
+    <div class="ativ-info">
+      <h4>Circuito em Casa (4 estações)</h4>
+      <p>Montar 4 estações: polichinelos, agachamento livre, corrida parada, prancha 15s. Repetir 3 vezes com descanso curto entre cada rodada. Cronômetro + música motivadora.</p>
+      <div class="ativ-meta"><span class="badge badge-verde">3 rodadas</span><span class="badge badge-rosa">20 min total</span></div>
+    </div>
+  </div>
+
+  <div class="ativ-card">
+    <div class="ativ-icon">💃</div>
+    <div class="ativ-info">
+      <h4>Dança com YouTube</h4>
+      <p>Buscar "dança challenge" ou "Just Dance" no YouTube. Ela pode dançar com irmãos, primos ou amigos. Não parece exercício — é pura brincadeira com benefício real.</p>
+      <div class="ativ-meta"><span class="badge badge-verde">15-30 min</span><span class="badge badge-roxo">Alta adesão</span></div>
+    </div>
+  </div>
+
+  <div class="ativ-card">
+    <div class="ativ-icon">🏃</div>
+    <div class="ativ-info">
+      <h4>Pega-pega / Brincadeiras Ativas</h4>
+      <p>Pega-pega, esconde-esconde com movimento, caça ao tesouro — qualquer brincadeira com irmãos, primos ou amigos que envolva correr e movimentar o corpo.</p>
+      <div class="ativ-meta"><span class="badge badge-verde">Livre</span><span class="badge badge-laranja">Social</span></div>
+    </div>
+  </div>
+
+  <div class="ativ-card">
+    <div class="ativ-icon">🍇</div>
+    <div class="ativ-info">
+      <h4>Recompensa pós-atividade</h4>
+      <p>Uvas congeladas como "sorvete" natural após o treino. Cria uma associação positiva com movimento e satisfaz a vontade de algo gelado e doce de forma saudável.</p>
+      <div class="ativ-meta"><span class="badge badge-rosa">Sabor de sorvete</span><span class="badge badge-verde">Nutritivo</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>⏰ Melhor horário em dias sem academia</h3>
+    <p>O intervalo entre o lanche (15h) e o jantar (18h) é ideal. Atividade moderada antes do jantar melhora a captação de glicose muscular e contribui diretamente para o perfil metabólico da Laura.</p>
+  </div>
+</div>
+
+<!-- ===================== SELETIVIDADE ===================== -->
+<div class="section" id="seletividade">
+  <p class="section-title">💛 Dicas de Seletividade — Específicas para a Laura</p>
+
+  <div class="card" style="background:var(--rosa-claro);border:none">
+    <h3 style="color:var(--rosa)">🧠 Entendendo a Laura</h3>
+    <p>A Laura tem 10 anos, come muito rápido, mastica pouco, e tem períodos de ansiedade com vontade de doces. Ela aceita bem: cuscuz, calabresa, pizza, açaí, alface, pepino, morango, kiwi, banana (em preparações). Rejeita: banana pura, alimentos moles na lancheira.</p>
+    <p style="margin-top:8px">A seletividade da Laura não é teimosia — é sensorial e comportamental. As estratégias abaixo respeitam isso.</p>
+  </div>
+
+  <p class="section-title">Para os Pais</p>
+
+  <div class="selet-card">
+    <h4>🚫 Nunca pressionar, nunca proibir</h4>
+    <p>Frases como "só mais um pouquinho" ou "experimenta só esse" criam resistência. A Laura deve sentir que tem controle sobre o que come. Proibir o biscoito ou o açaí aumenta a ansiedade e a compulsão.</p>
+    <div class="highlight-box"><strong>O que funciona</strong>Oferecer opções dentro do plano e deixar ela escolher. "Você quer o morango ou o kiwi hoje?" dá autonomia sem abrir mão da nutrição.</div>
+  </div>
+
+  <div class="selet-card">
+    <h4>🎯 Envolver a Laura no preparo</h4>
+    <p>Crianças de 10 anos que participam do preparo têm muito mais disposição para experimentar. A Laura pode:</p>
+    <ul>
+      <li>Bater a vitamina ela mesma</li>
+      <li>Montar o próprio bowl do lanche (iogurte + fruta + aveia)</li>
+      <li>Misturar a massa da panqueca de cacau</li>
+      <li>Escolher o recheio da crepioca</li>
+      <li>Montar o sanduíche da lancheira na hora de comer</li>
+    </ul>
+    <div class="highlight-box"><strong>Por quê funciona</strong>Quando ela escolhe e prepara, o alimento deixa de ser "coisa que mandaram comer" e vira "coisa que eu fiz".</div>
+  </div>
+
+  <div class="selet-card">
+    <h4>🌱 Exposição gradual a novos alimentos</h4>
+    <p>A Laura já aceita alface e pepino — isso é uma base excelente. Para novos alimentos:</p>
+    <ul>
+      <li>Apresentar 1 alimento novo por semana, ao lado dos que ela já aceita</li>
+      <li>Nunca misturar o novo com o aceito de início</li>
+      <li>Colocar quantidade pequena no prato (ex: 2 tomates cereja)</li>
+      <li>Ela não precisa comer na primeira apresentação — só ver e cheirar já conta</li>
+      <li>Elogiar quando ela explora, mesmo sem comer</li>
+    </ul>
+    <div class="highlight-box"><strong>Meta de curto prazo</strong>Tomate cereja ao lado da salada (ela já aceita alface e pepino — o tomate é o próximo passo natural).</div>
+  </div>
+
+  <div class="selet-card">
+    <h4>🍕 Usar os alimentos favoritos como porta de entrada</h4>
+    <p>A Laura ama pizza e cuscuz. Esses são pontos de apoio, não problemas:</p>
+    <ul>
+      <li><strong>Pizza caseira na airfryer:</strong> massa de tapioca + molho de tomate natural + muçarela + frango desfiado. Ela reconhece como pizza, mas é muito mais nutritiva</li>
+      <li><strong>Cuscuz com recheios novos:</strong> ela já aceita com ovo e queijo. Próximo passo: frango desfiado junto. Depois: cenoura ralada. Cada adição leva semanas</li>
+      <li><strong>Açaí controlado:</strong> não proibir, mas planejar. Oferecer açaí sem granola industrializada, com morango e banana — frutas que ela já aceita</li>
+    </ul>
+  </div>
+
+  <div class="selet-card">
+    <h4>⏱️ Desacelerar sem parecer punição</h4>
+    <p>A Laura come muito rápido e mastiga pouco. Isso reduz a saciedade (o sinal de "estou satisfeita" leva 20 minutos para chegar ao cérebro).</p>
+    <ul>
+      <li><strong>Regra do apoiar (combinada com ela):</strong> apresentar como um desafio/jogo, não como regra imposta</li>
+      <li><strong>Sem tela durante refeições:</strong> a distração é o maior inimigo da mastigação consciente</li>
+    </ul>
+  </div>
+
+  <div class="selet-card">
+    <h4>😟 Ansiedade e vontade de doces</h4>
+    <p>Nos períodos de ansiedade, a vontade de doce é real e não deve ser ignorada. A estratégia é redirecionar para opções planejadas:</p>
+    <ul>
+      <li>Validar primeiro: "Tá com vontade de algo gostoso? Vamos ver o que tem."</li>
+      <li>Kit belisco disponível: morango, kiwi, uvas congeladas, cenoura + pasta de amendoim</li>
+      <li>Morango ou kiwi com 1 col. chá de pasta de amendoim = "doce + cremoso" que satisfaz</li>
+      <li>Se ela quiser o KitKat: combinar 1 unidade (não a caixa) junto com uma fruta</li>
+    </ul>
+    <div class="highlight-box"><strong>Atenção</strong>A proibição total do KitKat deve ser gradual. Reduzir frequência e quantidade ao longo dos dias é mais eficaz do que cortar de vez.</div>
+  </div>
+
+  <div class="selet-card">
+    <h4>🏠 Estrutura que ajuda</h4>
+    <ul>
+      <li><strong>Horários fixos:</strong> refeições no mesmo horário reduzem beliscos espontâneos</li>
+      <li><strong>Autonomia na sexta:</strong> permitir que ela monte a lancheira da sexta escolhendo entre as opções do plano</li>
+      <li><strong>Não comentar recusas:</strong> evitar "você não comeu nada hoje" — cria pressão e negatividade</li>
+      <li><strong>Pés no chão na cadeira:</strong> postura adequada melhora conforto e ritmo da refeição</li>
+      <li><strong>Refeições em família:</strong> ela observa os adultos comendo e isso influencia positivamente</li>
+    </ul>
+  </div>
+
+  <div class="card" style="background:var(--verde-claro);border:none;margin-top:4px">
+    <h3 style="color:var(--verde)">✅ O que já funciona com a Laura</h3>
+    <ul>
+      <li>Aceita panqueca e vitamina de banana (porta de entrada para frutas)</li>
+      <li>Aceita alface e pepino (salada é possível!)</li>
+      <li>Aceita morango e kiwi (frutas cítricas funcionam)</li>
+      <li>Aceita cuscuz com ovo e queijo (base sólida de refeições)</li>
+      <li>Aceita frango desfiado (proteína versátil)</li>
+      <li>Bebe bastante água (ótimo!)</li>
+      <li>Dorme bem (ajuda na regulação do apetite)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===================== ORIENTAÇÕES ===================== -->
+<div class="section" id="orientacoes">
+  <p class="section-title">📌 Orientações Gerais</p>
+
+  <div class="card">
+    <div class="orient-item">
+      <div class="orient-emoji">🌱</div>
+      <div class="orient-text"><h4>Introdução Gradual de Alimentos</h4><p>Ofereça porções menores ou em preparações diferentes. Não esconda os ingredientes — transparência gera confiança.</p></div>
+    </div>
+    <div class="orient-item">
+      <div class="orient-emoji">💧</div>
+      <div class="orient-text"><h4>Água Entre as Refeições</h4><p>Nos intervalos entre refeições, ofereça apenas água. Evita distrações e mantém o foco nas refeições principais.</p></div>
+    </div>
+    <div class="orient-item">
+      <div class="orient-emoji">🚫</div>
+      <div class="orient-text"><h4>Evite Frases de Pressão</h4><p>"Só mais um pouquinho" ou "experimenta só esse" criam pressão. A Laura deve sentir que tem controle sobre o que come.</p></div>
+    </div>
+    <div class="orient-item">
+      <div class="orient-emoji">🎯</div>
+      <div class="orient-text"><h4>Autonomia Alimentar</h4><p>Permita que ela decida a lancheira nas sextas-feiras ou escolha uma refeição do final de semana. Desenvolve autonomia e confiança.</p></div>
+    </div>
+    <div class="orient-item">
+      <div class="orient-emoji">🙏</div>
+      <div class="orient-text"><h4>Respeito pela Decisão</h4><p>Cabe a ela decidir se vai comer ou não. A função dos pais é garantir a oferta de alimentos variados, sem pressões.</p></div>
+    </div>
+    <div class="orient-item">
+      <div class="orient-emoji">🫶</div>
+      <div class="orient-text"><h4>Respeitar a Saciedade</h4><p>Crianças não fazem dieta! A quantidade deve ser ajustada conforme a saciedade da Laura. Não force além do que ela se sente confortável.</p></div>
+    </div>
+    <div class="orient-item">
+      <div class="orient-emoji">🍽️</div>
+      <div class="orient-text"><h4>Refeições em Família</h4><p>Sempre que possível, toda a família à mesa. A Laura observa e aprende comportamentos alimentares dos adultos.</p></div>
+    </div>
+    <div class="orient-item">
+      <div class="orient-emoji">🤐</div>
+      <div class="orient-text"><h4>Evite Comentários sobre Recusa</h4><p>Falar sobre o que ela não come cria ambiente negativo. Foque no que ela aceita e elogie as conquistas.</p></div>
+    </div>
+    <div class="orient-item">
+      <div class="orient-emoji">🧸</div>
+      <div class="orient-text"><h4>Ambiente Acolhedor</h4><p>Um objeto favorito na mesa pode tornar o momento menos estressante. A refeição deve ser um momento seguro e agradável.</p></div>
+    </div>
+    <div class="orient-item">
+      <div class="orient-emoji">⏰</div>
+      <div class="orient-text"><h4>Horários Definidos</h4><p>Horários fixos reduzem os beliscos espontâneos. Refeições: 10-30 min. Lanches: 10-15 min.</p></div>
+    </div>
+    <div class="orient-item">
+      <div class="orient-emoji">📱</div>
+      <div class="orient-text"><h4>Redução de Distrações</h4><p>Reduzir gradualmente telas durante as refeições. Isso melhora a consciência alimentar e a mastigação.</p></div>
+    </div>
+    <div class="orient-item">
+      <div class="orient-emoji">🪑</div>
+      <div class="orient-text"><h4>Postura à Mesa</h4><p>Pés apoiados no chão durante a refeição. Ajuda no equilíbrio e permite alimentação mais confortável e precisa.</p></div>
+    </div>
+  </div>
+
+  <div class="card" style="text-align:center">
+    <p style="font-size:13px;margin-top:4px"><strong>Mylena Cristina</strong><br>Nutricionista Materno-Infantil<br>CRN-11 17328/P · @mylenaacristinanutricionista</p>
+  </div>
+</div>
+
+<footer>
+  CRN-11 17328/P · @mylenaacristinanutricionista · (88) 9 8887-1441<br>
+  <span style="font-size:11px;opacity:0.7">Este documento é de uso exclusivo do destinatário.</span>
+</footer>
+
+<script>
+  // NAV SECTION
+  function showSection(id, btn) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  // DAY SELECTOR
+  function showDay(day, btn) {
+    document.querySelectorAll('.day-plan').forEach(d => d.classList.remove('active'));
+    document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('day-' + day).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  // MEAL ACCORDION
+  function toggleMeal(el) {
+    el.classList.toggle('open');
+  }
+
+  // WATER TRACKER
+  const TOTAL_CUPS = 8;
+  let filled = parseInt(localStorage.getItem('water-cups') || '0');
+
+  function renderCups() {
+    const container = document.getElementById('cups');
+    container.innerHTML = '';
+    for (let i = 0; i < TOTAL_CUPS; i++) {
+      const cup = document.createElement('div');
+      cup.className = 'cup' + (i < filled ? ' filled' : '');
+      cup.textContent = i < filled ? '💧' : '○';
+      cup.onclick = () => { filled = (i + 1 === filled) ? 0 : i + 1; save(); renderCups(); };
+      container.appendChild(cup);
+    }
+    const label = document.getElementById('water-label');
+    const ml = filled * 300;
+    label.textContent = ml + 'ml / 2.300ml';
+  }
+
+  function save() { try { localStorage.setItem('water-cups', filled); } catch(e) {} }
+
+  // Reset at midnight
+  const today = new Date().toDateString();
+  const lastDay = localStorage.getItem('water-day');
+  if (lastDay !== today) { filled = 0; try { localStorage.setItem('water-day', today); } catch(e) {} }
+
+  renderCups();
+</script>
+</body>
+</html>
